@@ -90,7 +90,113 @@ The app uses a demo Constructor API key. To use your own:
 1. Update the key in `app/lib/cio-client.ts`
 2. Ingest the catalog files from `catalog/` into your Constructor dashboard under a `"Content"` section
 3. Create a recommendations pod named `"popular-content"` and slot some articles
-4. Make the following fields displayable and facetable: `url`, `image_url`, `description`, `author`, `date`, `tags`, `keywords`, `article_content`
+4. Configure field searchabilities using the API — see [Configuring Field Searchabilities](#configuring-field-searchabilities) below
+
+## Configuring Field Searchabilities
+
+After ingesting your catalog, you need to configure **searchabilities** so that Constructor knows which fields should be searchable, displayable, and facetable. This is a critical step — without it, the API responses won't include the metadata needed to render article cards, detail pages, or filter facets.
+
+Use the [Create or Update Searchabilities](https://docs.constructor.com/reference/v1-searchabilities-create-or-update-searchabilities) endpoint to configure all fields at once:
+
+```
+PUT https://ac.cnstrc.com/v1/searchabilities?section=Content
+```
+
+**Request body:**
+
+```json
+{
+  "searchabilities": [
+    {
+      "name": "url",
+      "fuzzy_searchable": false,
+      "exact_searchable": false,
+      "facetable": false,
+      "displayable": true,
+      "hidden": false
+    },
+    {
+      "name": "image_url",
+      "fuzzy_searchable": false,
+      "exact_searchable": false,
+      "facetable": false,
+      "displayable": true,
+      "hidden": false
+    },
+    {
+      "name": "description",
+      "fuzzy_searchable": false,
+      "exact_searchable": false,
+      "facetable": true,
+      "displayable": true,
+      "hidden": false
+    },
+    {
+      "name": "author",
+      "fuzzy_searchable": true,
+      "exact_searchable": false,
+      "facetable": true,
+      "displayable": true,
+      "hidden": false
+    },
+    {
+      "name": "date",
+      "fuzzy_searchable": false,
+      "exact_searchable": false,
+      "facetable": true,
+      "displayable": true,
+      "hidden": false
+    },
+    {
+      "name": "tags",
+      "fuzzy_searchable": true,
+      "exact_searchable": false,
+      "facetable": true,
+      "displayable": true,
+      "hidden": false
+    },
+    {
+      "name": "keywords",
+      "fuzzy_searchable": true,
+      "exact_searchable": false,
+      "facetable": true,
+      "displayable": true,
+      "hidden": false
+    },
+    {
+      "name": "article_content",
+      "fuzzy_searchable": false,
+      "exact_searchable": false,
+      "facetable": false,
+      "displayable": true,
+      "hidden": false
+    }
+  ]
+}
+```
+
+> **Note:** Make sure to include `?section=Content` in the query string so the searchabilities are applied to the Content section, not the default Products section.
+
+### What each setting does
+
+| Setting | Purpose |
+|---|---|
+| **`displayable: true`** | The field is returned in API responses. Required for rendering any field on the frontend (images, descriptions, author names, etc.). Without this, the field is stored but never sent to the client. |
+| **`facetable: true`** | The field can be used as a filter/facet in search and browse results. Enables filtering by author, tags, date, etc. |
+| **`fuzzy_searchable: true`** | The field's content is included in fuzzy text search. When a user searches for "skincare tips", Constructor will match against these fields even with typos. Best for human-readable text like `tags`, `keywords`, and `author`. |
+| **`exact_searchable: true`** | The field is matched only on exact terms. Useful for structured identifiers. |
+| **`hidden: false`** | The field is visible in the Constructor dashboard. Set to `true` for internal-only fields you don't want cluttering the UI. |
+
+### Why this matters
+
+By default, custom fields in your catalog are **not displayable and not searchable**. If you skip this step:
+
+- Article cards will render without images, descriptions, or author names (the data simply won't be in the API response)
+- Search won't match against tags or keywords, only the item name
+- Browse filters and facets won't work
+- Article detail pages will be mostly empty
+
+This is a one-time setup per section. Once configured, all future catalog ingestions for the `Content` section will respect these settings.
 
 ## Catalog Format
 
