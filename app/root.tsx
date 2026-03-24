@@ -8,6 +8,9 @@ import {
 } from "react-router";
 
 import type { Route } from "./+types/root";
+import { Navbar } from "./components/Navbar";
+import { Footer } from "./components/Footer";
+import { PageTransition } from "./components/PageTransition";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -42,7 +45,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-grow max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
+        <PageTransition>
+          <Outlet />
+        </PageTransition>
+      </main>
+      <Footer />
+    </div>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
@@ -62,14 +75,20 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
-      )}
-    </main>
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-grow max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
+        <div className="text-center py-20">
+          <h1 className="text-6xl font-light text-stone-300 mb-4">{message}</h1>
+          <p className="text-stone-500">{details}</p>
+          {stack && (
+            <pre className="w-full p-4 overflow-x-auto mt-8 text-left bg-stone-50 rounded-lg text-sm">
+              <code>{stack}</code>
+            </pre>
+          )}
+        </div>
+      </main>
+      <Footer />
+    </div>
   );
 }

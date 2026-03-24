@@ -1,0 +1,14 @@
+{"id": "beauty-blog", "name": "Beauty Blog", "parent_ids": [], "data": {}}
+{"id": "tutorials", "name": "Tutorials", "parent_ids": ["beauty-blog"], "data": {"description": "Step-by-step guides and how-tos for every skill level."}}
+{"id": "skincare", "name": "Skincare", "parent_ids": ["beauty-blog"], "data": {"description": "Routines, ingredients, and tips for healthy skin."}}
+{"id": "face", "name": "Face", "parent_ids": ["beauty-blog"], "data": {"description": "Foundation, concealer, contour, blush, and more."}}
+{"id": "eyes", "name": "Eyes", "parent_ids": ["beauty-blog"], "data": {"description": "Eyeshadow, mascara, eyeliner, and eye looks."}}
+{"id": "lips", "name": "Lips", "parent_ids": ["beauty-blog"], "data": {"description": "Lipstick, lip gloss, lip liner, and lip care."}}
+{"id": "brows", "name": "Brows", "parent_ids": ["beauty-blog"], "data": {"description": "Brow shaping, lamination, and styling."}}
+{"id": "trends", "name": "Trends", "parent_ids": ["beauty-blog"], "data": {"description": "What's hot in the beauty world right now."}}
+{"id": "product-reviews", "name": "Product Reviews", "parent_ids": ["beauty-blog"], "data": {"description": "Honest reviews and comparisons of popular products."}}
+{"id": "clean-beauty", "name": "Clean Beauty", "parent_ids": ["beauty-blog"], "data": {"description": "Vegan, cruelty-free, and ingredient-conscious beauty."}}
+{"id": "budget-beauty", "name": "Budget Beauty", "parent_ids": ["beauty-blog"], "data": {"description": "Great looks without breaking the bank."}}
+{"id": "tools", "name": "Tools", "parent_ids": ["beauty-blog"], "data": {"description": "Brushes, sponges, and beauty accessories."}}
+{"id": "seasonal", "name": "Seasonal", "parent_ids": ["beauty-blog"], "data": {"description": "Looks and tips for every season."}}
+{"id": "international-beauty", "name": "International Beauty", "parent_ids": ["beauty-blog"], "data": {"description": "K-beauty, J-beauty, and global beauty trends."}}
