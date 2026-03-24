@@ -224,7 +224,7 @@ export function SearchBar() {
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.15, delay: i * 0.03 }}
                       type="button"
-                      className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
+                      className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors cursor-pointer ${
                         activeIndex === globalIndex
                           ? "bg-stone-100 text-stone-900"
                           : "text-stone-600 hover:bg-stone-50"
@@ -269,7 +269,7 @@ export function SearchBar() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.2, delay: i * 0.04 }}
                         type="button"
-                        className={`text-left p-2 rounded-lg transition-colors flex flex-col gap-2 ${
+                        className={`text-left p-2 rounded-lg transition-colors flex flex-col gap-2 cursor-pointer ${
                           activeIndex === globalIndex
                             ? "bg-stone-100"
                             : "hover:bg-stone-50"
