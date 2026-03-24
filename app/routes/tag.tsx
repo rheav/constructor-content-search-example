@@ -1,24 +1,20 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 import type { Route } from "./+types/tag";
 import { CioResultCard } from "~/components/CioResultCard";
 import { getCioClient, CIO_SECTION } from "~/lib/cio-client";
 import { CATEGORIES } from "~/lib/categories";
 
-export function loader({ params }: Route.LoaderArgs) {
+export function meta({ params }: Route.MetaArgs) {
   const tag = params.tag;
-  return { tag };
-}
-
-export function meta({ data }: Route.MetaArgs) {
-  if (!data?.tag) {
+  if (!tag) {
     return [{ title: "Tag Not Found" }];
   }
   return [
-    { title: `${data.tag} Articles | Beauty Blog` },
+    { title: `${tag} Articles | Beauty Blog` },
     {
       name: "description",
-      content: `Browse all articles tagged with ${data.tag}.`,
+      content: `Browse all articles tagged with ${tag}.`,
     },
   ];
 }
@@ -29,8 +25,9 @@ interface CioResult {
   result_id?: string;
 }
 
-export default function TagPage({ loaderData }: Route.ComponentProps) {
-  const { tag } = loaderData;
+export default function TagPage() {
+  const { tag: tagParam } = useParams();
+  const tag = tagParam!;
   const allTags = CATEGORIES;
 
   const [results, setResults] = useState<CioResult[]>([]);

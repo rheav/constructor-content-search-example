@@ -1,16 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 import type { Route } from "./+types/article";
 import { getCioClient, CIO_SECTION } from "~/lib/cio-client";
 import { CioResultCard } from "~/components/CioResultCard";
 
-export function loader({ params }: Route.LoaderArgs) {
-  return { slug: params.slug };
-}
-
-export function meta({ data }: Route.MetaArgs) {
+export function meta({ params }: Route.MetaArgs) {
   return [
-    { title: `${data?.slug || "Article"} | Beauty Blog` },
+    { title: `${params.slug || "Article"} | Beauty Blog` },
     { name: "description", content: "Read this article on Beauty Blog." },
   ];
 }
@@ -31,8 +27,9 @@ interface CioItem {
   result_id?: string;
 }
 
-export default function ArticlePage({ loaderData }: Route.ComponentProps) {
-  const { slug } = loaderData;
+export default function ArticlePage() {
+  const { slug: slugParam } = useParams();
+  const slug = slugParam!;
 
   const [article, setArticle] = useState<CioItem | null>(null);
   const [related, setRelated] = useState<CioItem[]>([]);
