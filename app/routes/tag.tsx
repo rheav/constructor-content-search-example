@@ -32,6 +32,7 @@ export default function TagPage() {
 
   const [results, setResults] = useState<CioResult[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [resultId, setResultId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const requestIdRef = useRef(0);
@@ -62,22 +63,9 @@ export default function TagPage() {
           total_num_results: number;
         };
 
-        cio.tracker.trackBrowseResultsLoaded({
-          url: window.location.href,
-          filterName: "tags",
-          filterValue: tag,
-          items: response.results.map((r) => ({
-            itemName: r.value,
-            itemId: r.data?.id,
-          })),
-          resultCount: response.total_num_results,
-          resultPage: 1,
-          resultId: res.result_id,
-          section: CIO_SECTION,
-        });
-
         setResults(response.results);
         setTotalCount(response.total_num_results);
+        setResultId(res.result_id);
         setLoading(false);
       })
       .catch((err) => {
@@ -87,20 +75,6 @@ export default function TagPage() {
         setError(`Browse request failed: ${err.message || "Unknown error"}`);
       });
   }, [tag]);
-
-  const handleResultClick = (result: CioResult) => {
-    const cio = getCioClient();
-    if (cio && result.data?.id) {
-      cio.tracker.trackBrowseResultClick({
-        filterName: "tags",
-        filterValue: tag,
-        itemId: result.data.id,
-        itemName: result.value,
-        resultId: result.result_id,
-        section: CIO_SECTION,
-      });
-    }
-  };
 
   return (
     <div>
@@ -164,12 +138,20 @@ export default function TagPage() {
 
       {/* Results */}
       {!loading && results.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          data-cnstrc-browse
+          data-cnstrc-section={CIO_SECTION}
+          data-cnstrc-filter-name="tags"
+          data-cnstrc-filter-value={tag}
+          data-cnstrc-result-id={resultId ?? undefined}
+          data-cnstrc-num-results={totalCount}
+          data-cnstrc-result-page={1}
+        >
           {results.map((result, i) => (
             <CioResultCard
               key={result.data?.id || result.value}
               result={result}
-              onClick={() => handleResultClick(result)}
               index={i}
             />
           ))}
@@ -178,7 +160,17 @@ export default function TagPage() {
 
       {/* No results */}
       {!loading && !error && results.length === 0 && (
-        <div className="text-center py-20">
+        <div
+          className="text-center py-20"
+          data-cnstrc-browse
+          data-cnstrc-zero-result
+          data-cnstrc-section={CIO_SECTION}
+          data-cnstrc-filter-name="tags"
+          data-cnstrc-filter-value={tag}
+          data-cnstrc-result-id={resultId ?? undefined}
+          data-cnstrc-num-results={0}
+          data-cnstrc-result-page={1}
+        >
           <p className="text-stone-400 text-lg mb-2">No results found</p>
           <p className="text-stone-400 text-sm">
             No articles found for this tag. Content may not be ingested yet.

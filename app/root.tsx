@@ -11,6 +11,10 @@ import type { Route } from "./+types/root";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { PageTransition } from "./components/PageTransition";
+import { CnstrcHighlighter } from "./components/CnstrcHighlighter";
+import { CioBeacon } from "./components/CioBeacon";
+import { CioEventFeed } from "./components/CioEventFeed";
+import { CIO_API_KEY } from "./lib/cio-client";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -37,6 +41,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
+        {/*
+          window.cnstrc.indexKey routes beacon events to the correct index.
+          Our own data-driven beacon (<CioBeacon /> below) reads the
+          data-cnstrc-* attributes in the DOM and fires cio.tracker.* events.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.cnstrc = window.cnstrc || {}; window.cnstrc.indexKey = '${CIO_API_KEY}';`,
+          }}
+        />
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -55,6 +69,9 @@ export default function App() {
         </PageTransition>
       </main>
       <Footer />
+      <CnstrcHighlighter />
+      <CioBeacon />
+      <CioEventFeed />
     </div>
   );
 }

@@ -33,6 +33,8 @@ export default function ArticlePage() {
 
   const [article, setArticle] = useState<CioItem | null>(null);
   const [related, setRelated] = useState<CioItem[]>([]);
+  const [relatedPodId, setRelatedPodId] = useState<string | null>(null);
+  const [relatedResultId, setRelatedResultId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const requestIdRef = useRef(0);
@@ -73,41 +75,32 @@ export default function ArticlePage() {
         const item = response.results[0];
         setArticle(item);
 
-        // Track item detail load
-        cio.tracker.trackItemDetailLoad({
-          itemName: item.value,
-          itemId: item.data?.id || slug,
-          url: window.location.href,
-        });
-
-        // Fetch related articles by first tag
-        const tags = Array.isArray(item.data?.tags)
-          ? item.data.tags
-          : typeof item.data?.tags === "string"
-            ? item.data.tags.split(",").map((t: string) => t.trim())
-            : [];
-
-        if (tags.length > 0) {
-          cio.browse
-            .getBrowseResults("tags", tags[0], {
-              section: CIO_SECTION,
-              resultsPerPage: 4,
-            })
-            .then((relRes) => {
-              // Discard if navigated away
-              if (thisRequestId !== requestIdRef.current) return;
-              const relResponse = relRes.response as {
-                results: CioItem[];
-              };
-              const filtered = relResponse.results
-                .filter((r) => r.data?.id !== slug && r.data?.id !== item.data?.id)
-                .slice(0, 3);
-              setRelated(filtered);
-            })
-            .catch(() => {
-              // Silently fail for related — not critical
-            });
-        }
+        // Related articles come from the "popular-content" recommendations pod
+        // rather than a tag browse. "You might also like" is a recommendations
+        // use case, not a browse/filter one, so recs is the correct product and
+        // gives the beacon a recommendation view/click to track.
+        cio.recommendations
+          .getRecommendations("popular-content", {
+            numResults: 4,
+            section: CIO_SECTION,
+          })
+          .then((relRes) => {
+            // Discard if navigated away
+            if (thisRequestId !== requestIdRef.current) return;
+            const relResponse = relRes.response as {
+              results: CioItem[];
+              pod?: { id: string };
+            };
+            const filtered = relResponse.results
+              .filter((r) => r.data?.id !== slug && r.data?.id !== item.data?.id)
+              .slice(0, 3);
+            setRelated(filtered);
+            setRelatedPodId(relResponse.pod?.id ?? "popular-content");
+            setRelatedResultId(relRes.result_id);
+          })
+          .catch(() => {
+            // Silently fail for related — not critical
+          });
 
         setLoading(false);
       })
@@ -171,7 +164,13 @@ export default function ArticlePage() {
 
       {/* Article Content */}
       {!loading && article && (
-        <article>
+        <>
+        <article
+          data-cnstrc-product-detail
+          data-cnstrc-item-id={article.data?.id || slug}
+          data-cnstrc-item-name={article.value}
+          data-cnstrc-item-variation-id={article.data?.variation_id}
+        >
           {/* Header */}
           <header className="mb-10">
             {tags.length > 0 && (
@@ -259,25 +258,35 @@ export default function ArticlePage() {
               </div>
             )}
           </div>
-
-          {/* Related Articles */}
-          {related.length > 0 && (
-            <section className="border-t border-stone-200 pt-10">
-              <h2 className="text-xl font-medium text-stone-800 mb-6">
-                Related Articles
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {related.map((r, i) => (
-                  <CioResultCard
-                    key={r.data?.id || r.value}
-                    result={r}
-                    index={i}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
         </article>
+
+        {/* Related Articles — a recommendations pod, kept as a sibling of the
+            PDP container so the recs container is not nested inside
+            data-cnstrc-product-detail */}
+        {related.length > 0 && (
+          <section className="border-t border-stone-200 pt-10 mt-16">
+            <h2 className="text-xl font-medium text-stone-800 mb-6">
+              Related Articles
+            </h2>
+            <div
+              className="grid grid-cols-1 sm:grid-cols-3 gap-6"
+              data-cnstrc-recommendations
+              data-cnstrc-recommendations-pod-id={relatedPodId ?? undefined}
+              data-cnstrc-section={CIO_SECTION}
+              data-cnstrc-result-id={relatedResultId ?? undefined}
+              data-cnstrc-num-results={related.length}
+            >
+              {related.map((r, i) => (
+                <CioResultCard
+                  key={r.data?.id || r.value}
+                  result={r}
+                  index={i}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+        </>
       )}
 
       {/* Not found */}

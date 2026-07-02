@@ -5,3 +5,7 @@
 # React Router
 /.react-router/
 /build/
+
+# Test / scratch artifacts
+/.playwright-mcp/
+/overlay-top-check.png

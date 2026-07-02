@@ -27,6 +27,8 @@ export default function Home() {
 
   const [results, setResults] = useState<CioResult[]>([]);
   const [featured, setFeatured] = useState<CioResult | null>(null);
+  const [resultId, setResultId] = useState<string | null>(null);
+  const [podId, setPodId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const requestIdRef = useRef(0);
@@ -59,6 +61,8 @@ export default function Home() {
           setFeatured(response.results[0]);
           setResults(response.results.slice(1));
         }
+        setResultId(res.result_id);
+        setPodId(response.pod?.id ?? "popular-content");
         setLoading(false);
       })
       .catch((err) => {
@@ -163,7 +167,14 @@ export default function Home() {
           <h2 className="text-xl font-medium text-stone-800 tracking-wide mb-6">
             Popular Articles
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            data-cnstrc-recommendations
+            data-cnstrc-recommendations-pod-id={podId ?? undefined}
+            data-cnstrc-section={CIO_SECTION}
+            data-cnstrc-result-id={resultId ?? undefined}
+            data-cnstrc-num-results={results.length}
+          >
             {results.map((result, i) => (
               <CioResultCard
                 key={result.data?.id || result.value}

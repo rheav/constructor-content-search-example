@@ -9,7 +9,13 @@ export function getCioClient(): ConstructorIOClient | null {
   if (typeof window === "undefined") return null;
 
   if (!cioClient) {
-    cioClient = new ConstructorIOClient({ apiKey: CIO_API_KEY });
+    // sendTrackingEvents must be true for the client to actually dispatch
+    // behavioral events (trackSearchResultsLoaded, trackConversion, etc.) to
+    // Constructor. It defaults to false, which silently queues nothing.
+    cioClient = new ConstructorIOClient({
+      apiKey: CIO_API_KEY,
+      sendTrackingEvents: true,
+    });
   }
 
   return cioClient;

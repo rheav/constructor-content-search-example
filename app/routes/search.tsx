@@ -88,19 +88,6 @@ export default function SearchPage() {
           total_num_results: number;
         };
 
-        // Track search results loaded
-        cio.tracker.trackSearchResultsLoaded(query, {
-          url: window.location.href,
-          items: response.results.map((r) => ({
-            itemName: r.value,
-            itemId: r.data?.id,
-          })),
-          resultCount: response.total_num_results,
-          resultPage: 1,
-          resultId: res.result_id,
-          section: CIO_SECTION,
-        });
-
         setState({
           results: response.results,
           totalResults: response.total_num_results,
@@ -123,18 +110,6 @@ export default function SearchPage() {
         }));
       });
   }, [query]);
-
-  const handleResultClick = (result: CioResult) => {
-    const cio = getCioClient();
-    if (cio && result.data?.id) {
-      cio.tracker.trackSearchResultClick(query, {
-        itemName: result.value,
-        itemId: result.data.id,
-        resultId: result.result_id,
-        section: CIO_SECTION,
-      });
-    }
-  };
 
   const noResults = !state.loading && query.trim() && state.results.length === 0 && !state.error;
 
@@ -219,12 +194,19 @@ export default function SearchPage() {
 
       {/* Results */}
       {!state.loading && state.results.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          data-cnstrc-search
+          data-cnstrc-search-term={query}
+          data-cnstrc-section={CIO_SECTION}
+          data-cnstrc-result-id={state.resultId ?? undefined}
+          data-cnstrc-num-results={state.totalResults}
+          data-cnstrc-result-page={state.page}
+        >
           {state.results.map((result, i) => (
             <CioResultCard
               key={result.data?.id || result.value}
               result={result}
-              onClick={() => handleResultClick(result)}
               index={i}
             />
           ))}
@@ -233,7 +215,16 @@ export default function SearchPage() {
 
       {/* No results */}
       {noResults && (
-        <div className="text-center py-20">
+        <div
+          className="text-center py-20"
+          data-cnstrc-search
+          data-cnstrc-zero-result
+          data-cnstrc-search-term={query}
+          data-cnstrc-section={CIO_SECTION}
+          data-cnstrc-result-id={state.resultId ?? undefined}
+          data-cnstrc-num-results={0}
+          data-cnstrc-result-page={state.page}
+        >
           <p className="text-stone-400 text-lg mb-2">No results found</p>
           <p className="text-stone-400 text-sm">
             Try a different search term or{" "}

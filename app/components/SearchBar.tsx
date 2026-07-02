@@ -3,6 +3,10 @@ import { useNavigate } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { getCioClient, CIO_SECTION } from "~/lib/cio-client";
 
+// Tracking is data-driven: the Constructor beacon reads the data-cnstrc-*
+// attributes on the form, input, autosuggest container, and items below.
+// No manual cio.tracker.* calls are needed here.
+
 interface Suggestion {
   value: string;
   data?: {
@@ -79,36 +83,16 @@ export function SearchBar() {
     e.preventDefault();
     if (!query.trim()) return;
 
-    const cio = getCioClient();
-    if (cio) {
-      cio.tracker.trackSearchSubmit(query, { originalQuery: query });
-    }
-
     setIsOpen(false);
     navigate(`/search?q=${encodeURIComponent(query.trim())}`);
   };
 
   const handleSuggestionClick = (type: "suggestion" | "content", suggestion: Suggestion) => {
-    const cio = getCioClient();
-
     if (type === "suggestion") {
-      if (cio) {
-        cio.tracker.trackAutocompleteSelect(suggestion.value, {
-          originalQuery: query,
-          section: "Search Suggestions",
-        });
-      }
       setQuery(suggestion.value);
       setIsOpen(false);
       navigate(`/search?q=${encodeURIComponent(suggestion.value)}`);
     } else {
-      if (cio && suggestion.data?.id) {
-        cio.tracker.trackAutocompleteSelect(suggestion.value, {
-          originalQuery: query,
-          section: CIO_SECTION,
-          itemId: suggestion.data.id,
-        });
-      }
       setIsOpen(false);
       if (suggestion.data?.url) {
         navigate(suggestion.data.url);
@@ -137,10 +121,6 @@ export function SearchBar() {
   };
 
   const handleFocus = () => {
-    const cio = getCioClient();
-    if (cio) {
-      cio.tracker.trackInputFocus();
-    }
     if (allItems.length > 0) setIsOpen(true);
   };
 
@@ -169,7 +149,7 @@ export function SearchBar() {
 
   return (
     <div className="relative w-full max-w-md">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} data-cnstrc-search-form>
         <div className="relative">
           <svg
             className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400"
@@ -195,6 +175,7 @@ export function SearchBar() {
             placeholder="Search articles..."
             className="w-full pl-10 pr-4 py-2 text-sm bg-stone-100 border border-stone-200 rounded-full text-stone-800 placeholder-stone-400 focus:outline-none focus:border-stone-400 focus:bg-white transition-colors"
             autoComplete="off"
+            data-cnstrc-search-input
           />
         </div>
       </form>
@@ -208,6 +189,7 @@ export function SearchBar() {
             exit={{ opacity: 0, y: -4, scale: 0.98 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
             className="absolute top-full mt-2 right-0 min-w-[480px] bg-white border border-stone-200 rounded-xl shadow-xl z-50 overflow-hidden"
+            data-cnstrc-autosuggest
           >
             {/* Search Suggestions */}
             {suggestions.searchSuggestions.length > 0 && (
@@ -224,6 +206,8 @@ export function SearchBar() {
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.15, delay: i * 0.03 }}
                       type="button"
+                      data-cnstrc-item-section="Search Suggestions"
+                      data-cnstrc-item-name={s.value}
                       className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors cursor-pointer ${
                         activeIndex === globalIndex
                           ? "bg-stone-100 text-stone-900"
@@ -269,6 +253,9 @@ export function SearchBar() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.2, delay: i * 0.04 }}
                         type="button"
+                        data-cnstrc-item-section={CIO_SECTION}
+                        data-cnstrc-item-name={s.value}
+                        data-cnstrc-item-id={s.data?.id}
                         className={`text-left p-2 rounded-lg transition-colors flex flex-col gap-2 cursor-pointer ${
                           activeIndex === globalIndex
                             ? "bg-stone-100"

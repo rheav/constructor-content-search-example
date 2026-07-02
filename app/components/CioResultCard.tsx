@@ -11,20 +11,21 @@ interface CioResult {
     tags?: string[] | string;
     author?: string;
     date?: string;
+    variation_id?: string;
     [key: string]: any;
   };
+  strategy?: { id?: string };
   result_id?: string;
 }
 
 export function CioResultCard({
   result,
-  onClick,
   index = 0,
 }: {
   result: CioResult;
-  onClick?: () => void;
   index?: number;
 }) {
+  const isRecommendation = !!result.strategy?.id;
   const url = result.data?.url || (result.data?.id ? `/blog/${result.data.id}` : "/");
   const tags = Array.isArray(result.data?.tags)
     ? result.data.tags
@@ -41,10 +42,18 @@ export function CioResultCard({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.05, ease: "easeOut" }}
+      data-cnstrc-item-id={result.data?.id}
+      data-cnstrc-item-name={result.value}
+      data-cnstrc-item-variation-id={result.data?.variation_id}
+      {...(isRecommendation
+        ? {
+            "data-cnstrc-item": "recommendation",
+            "data-cnstrc-strategy-id": result.strategy!.id,
+          }
+        : {})}
     >
     <Link
       to={url}
-      onClick={onClick}
       className="group flex flex-col bg-white border border-stone-200 rounded-xl overflow-hidden hover:border-stone-400 hover:shadow-md transition-all duration-300 h-full"
     >
       {/* Image */}
